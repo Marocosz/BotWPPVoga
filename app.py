@@ -8,7 +8,7 @@ import os
 # --- CONFIGURAÇÕES ---
 # O bot vai pegar as configurações do ambiente do Docker Compose
 EVOLUTION_API_URL = os.getenv("EVOLUTION_API_URL", "http://evolution-api:8080")
-EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY", "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")
+EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY")
 INSTANCE_NAME = "minha-instancia"
 # --------------------
 
