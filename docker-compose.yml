@@ -1,13 +1,13 @@
 services:
   api:
     container_name: evolution_api
-    image: atendai/evolution-api:homolog
+    image: evoapicloud/evolution-api:latest
     restart: always
     depends_on:
       - redis
       - postgres
     ports:
-      - 80:8080
+      - 8080:8080
     volumes:
       - evolution_instances:/evolution/instances
     networks:
@@ -15,7 +15,7 @@ services:
     env_file:
       - .env
     expose:
-      - 80
+      - 8080
 
   redis:
     image: redis:latest
