@@ -1,64 +1,48 @@
-# app.py
-
 import requests
 import json
-from flask import Flask, request, jsonify
-import os
 
-# --- CONFIGURAÇÕES ---
-# O bot vai pegar as configurações do ambiente do Docker Compose
-EVOLUTION_API_URL = os.getenv("EVOLUTION_API_URL", "http://evolution-api:8080")
-EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY")
-INSTANCE_NAME = "minha-instancia"
-# --------------------
+# --- Suas Configurações ---
+API_URL = "http://localhost:8080"
+INSTANCE_NAME = "teste1"
+API_KEY = "D3E21DB11962-4CED-8B4A-1950EBC5E46C"  # Sua chave API
 
-app = Flask(__name__)
+# --- Dados da Mensagem ---
+# ⬇️ Altere o número e a mensagem conforme precisar ⬇️
+numero_para_enviar = "5534991717463"
+mensagem_para_enviar = "Vtnc rhuan"
 
-def send_whatsapp_message(to_number, message_text):
-    """Função para enviar uma mensagem de texto."""
-    url = f"{EVOLUTION_API_URL}/message/sendText/{INSTANCE_NAME}"
+def enviar_mensagem_correta(numero, texto):
+    """Envia a mensagem usando a estrutura de payload correta."""
+    
+    print(f"Enviando para '{numero}' com a estrutura correta...")
+    
+    endpoint = f"{API_URL}/message/sendText/{INSTANCE_NAME}"
     headers = {
         "Content-Type": "application/json",
-        "apikey": EVOLUTION_API_KEY
+        "apikey": API_KEY
     }
+    
+    # Payload baseado na documentação que você encontrou.
+    # A mudança crucial está aqui: 'text' está no nível principal.
     payload = {
-        "number": to_number,
-        "textMessage": { "text": message_text }
+        "number": numero,
+        "text": texto,
+        "delay": 1200 # Parâmetro opcional do exemplo
     }
     
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=30)
-        response.raise_for_status()
-        print(f"Resposta da API ao enviar para {to_number}: {response.json()}")
-        return True
-    except requests.exceptions.RequestException as e:
-        print(f"Erro ao enviar mensagem para {to_number}: {e}")
-        return False
-
-@app.route('/webhook', methods=['POST'])
-def webhook_handler():
-    """Endpoint que recebe os webhooks da Evolution API."""
-    webhook_data = request.json
-    print("\n--- Webhook Recebido ---")
-    print(json.dumps(webhook_data, indent=2))
-
-    if (webhook_data.get('event') == 'messages.upsert' and 
-        not webhook_data.get('data', {}).get('key', {}).get('fromMe')):
-        
+        response = requests.post(endpoint, json=payload, headers=headers)
+        print("--- Resposta da API ---")
+        print(f"Status Code: {response.status_code}")
+        # Tenta formatar a resposta como JSON, senão mostra como texto
         try:
-            sender = webhook_data['data']['key']['remoteJid']
-            message_text = webhook_data['data']['message'].get('conversation') or \
-                           webhook_data['data']['message'].get('extendedTextMessage', {}).get('text')
+            print(json.dumps(response.json(), indent=2))
+        except json.JSONDecodeError:
+            print(response.text)
+            
+    except requests.exceptions.RequestException as e:
+        print(f"ERRO DE CONEXÃO: {e}")
 
-            if message_text:
-                print(f"Mensagem recebida de {sender}: '{message_text}'")
-                reply_text = f"Você disse: '{message_text}'"
-                send_whatsapp_message(sender, reply_text)
-
-        except KeyError as e:
-            print(f"Erro ao processar o webhook: chave não encontrada - {e}")
-
-    return jsonify({"status": "ok"}), 200
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+# --- Ponto de Execução ---
+if __name__ == "__main__":
+    enviar_mensagem_correta(numero_para_enviar, mensagem_para_enviar)
