@@ -1,19 +1,26 @@
-from pydantic import BaseModel, Field
-from typing import Optional, Any
+from pydantic import BaseModel
+from typing import Optional, Dict
 
-class MessageKey(BaseModel):
-    remoteJid: Optional[str] = None
-    fromMe: Optional[bool] = False
-    id: Optional[str] = None
+class WebhookMessageContent(BaseModel):
+    """Modela o conteúdo de uma mensagem de texto."""
+    conversation: Optional[str] = None
+    extendedTextMessage: Optional[Dict] = None
 
-class MessageData(BaseModel):
-    key: MessageKey
-    pushName: Optional[str] = None
-    message: Optional[dict[str, Any]] = None
-    messageType: Optional[str] = None
-    messageTimestamp: Optional[int] = None
+class WebhookKey(BaseModel):
+    """Modela a chave identificadora da mensagem."""
+    remoteJid: str
+    fromMe: bool
+    id: str
+    participant: Optional[str] = None
 
+class WebhookData(BaseModel):
+    """Modela o objeto 'data' principal do webhook."""
+    key: WebhookKey
+    pushName: Optional[str] = "Cliente"
+    message: Optional[WebhookMessageContent] = None
+    
 class WebhookPayload(BaseModel):
-    instance: str
+    """Modela a estrutura completa do webhook que recebemos."""
     event: str
-    data: MessageData
+    instance: str
+    data: WebhookData
